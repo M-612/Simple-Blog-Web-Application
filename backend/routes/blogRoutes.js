@@ -1,28 +1,27 @@
-import express from "express";
-import Blog from "../models/Blog.js";
-
+// ✅ blog routes
+const express = require("express");
 const router = express.Router();
+const Blog = require("./models/Blog");
 
-// 📝 Create new blog
-router.post("/", async (req, res) => {
+// CREATE blog
+router.post("/api/blogs", async (req, res) => {
     try {
-        const { title, content, author } = req.body;
-        const newBlog = new Blog({ title, content, author });
+        const newBlog = new Blog(req.body);
         await newBlog.save();
-        res.status(201).json({ message: "Blog created successfully", blog: newBlog });
-    } catch (error) {
-        res.status(500).json({ message: "Error creating blog", error });
+        res.status(201).json(newBlog);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
 });
 
-// 📜 Get all blogs
-router.get("/", async (req, res) => {
+// READ all blogs
+router.get("/api/blogs", async (req, res) => {
     try {
         const blogs = await Blog.find().sort({ createdAt: -1 });
-        res.status(200).json(blogs);
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching blogs", error });
+        res.json(blogs);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 
-export default router;
+module.exports = router;
