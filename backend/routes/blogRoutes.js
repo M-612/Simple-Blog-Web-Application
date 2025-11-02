@@ -1,21 +1,31 @@
-// ✅ blog routes
-const express = require("express");
+import express from "express";
+import Blog from "../models/Blog.js";
+
 const router = express.Router();
-const Blog = require("./models/Blog");
 
 // CREATE blog
-router.post("/api/blogs", async (req, res) => {
+router.post("/blogs", async (req, res) => {
     try {
-        const newBlog = new Blog(req.body);
-        await newBlog.save();
-        res.status(201).json(newBlog);
+        console.log('Received blog post request:', req.body);
+        if (!req.body.title || !req.body.content) {
+            return res.status(400).json({ message: "Title and content are required" });
+        }
+        const newBlog = new Blog({
+            title: req.body.title,
+            content: req.body.content,
+            author: req.body.author || "Anonymous"
+        });
+        const savedBlog = await newBlog.save();
+        console.log('Blog saved successfully:', savedBlog);
+        res.status(201).json(savedBlog);
     } catch (err) {
+        console.error('Error creating blog:', err);
         res.status(400).json({ message: err.message });
     }
 });
 
 // READ all blogs
-router.get("/api/blogs", async (req, res) => {
+router.get("/blogs", async (req, res) => {
     try {
         const blogs = await Blog.find().sort({ createdAt: -1 });
         res.json(blogs);
@@ -24,4 +34,4 @@ router.get("/api/blogs", async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
